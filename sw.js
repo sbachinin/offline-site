@@ -1,15 +1,11 @@
 self.addEventListener('install', e => {
-    caches
-    .open('offline-site')
-    .then(
-        function(cache) {
-            return cache.addAll([
-                './',
-                './styles.css',
-                './script.js',
-                './image.jpg',
-            ])
-        }
+    caches.open('offline-site')
+        .then(cache => cache.addAll([
+            './',
+            './styles.css',
+            './script.js',
+            './image.jpg',
+        ])
     )
 })
 
