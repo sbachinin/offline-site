@@ -14,12 +14,18 @@ self.addEventListener('fetch', event => {
         caches.match(event.request)
             .then(response => {
                 const fetchPromise = fetch(event.request)
-                    .then(freshResponse => {
-                        return caches.open('offline-site')
-                            .then(cache => {
-                                cache.put(event.request, freshResponse.clone())
-                                return freshResponse
-                            })
+                    .then(async freshResponse => {
+                        if (event.request.mode === 'navigate') {
+                            const htmlText = await freshResponse.clone().text()
+                            
+                            const clients = await self.clients.matchAll()
+                            clients.forEach(client => client.postMessage({
+                                msg: 'update HTML'
+                            }))
+                        }
+                        const cache = await caches.open('offline-site')
+                        cache.put(event.request, freshResponse.clone())
+                        return freshResponse
                     })
                 
                 return response || fetchPromise
