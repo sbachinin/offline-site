@@ -10,6 +10,8 @@ document.querySelector('img').addEventListener('contextmenu', e => {
 
 navigator.serviceWorker.addEventListener('message', event => {
     setTimeout(() => {
-        document.body.innerHTML = 'something new'
+        const div = document.createElement('div')
+        div.innerHTML = '<button onclick="location.reload()">Refresh to get an update</button>'
+        document.body.append(div)
     }, 2000)
 })

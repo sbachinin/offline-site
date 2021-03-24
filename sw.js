@@ -1,11 +1,13 @@
+const shellFilePaths = [
+    './',
+    './styles.css',
+    './script.js',
+    './image.jpg',
+]
+
 self.addEventListener('install', e => {
     caches.open('offline-site')
-        .then(cache => cache.addAll([
-            './',
-            './styles.css',
-            './script.js',
-            './image.jpg',
-        ])
+        .then(cache => cache.addAll(shellFilePaths)
     )
 })
 
@@ -15,12 +17,14 @@ self.addEventListener('fetch', event => {
             .then(response => {
                 const fetchPromise = fetch(event.request)
                     .then(async freshResponse => {
-                        if (event.request.mode === 'navigate') {
+                        const isShellFile = shellFilePaths.includes(event.request.url)
+                        if (isShellFile) {
+                            const oldHtmlText = await response.clone().text()
                             const htmlText = await freshResponse.clone().text()
-                            
+                            if (oldHtmlText === htmlText) return
                             const clients = await self.clients.matchAll()
                             clients.forEach(client => client.postMessage({
-                                msg: 'update HTML'
+                                msg: 'new HTML file received'
                             }))
                         }
                         const cache = await caches.open('offline-site')
@@ -28,7 +32,7 @@ self.addEventListener('fetch', event => {
                         return freshResponse
                     })
                 
-                return response || fetchPromise
+                return response.clone() || fetchPromise
             })
     )
 })
