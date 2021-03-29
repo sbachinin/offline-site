@@ -15,12 +15,14 @@ self.addEventListener('install', e => {
 
 self.addEventListener('fetch', event => {
     event.respondWith(
-        caches
-        .match(event.request)
-        .then(
-            function(response) {
-                return response || fetch(event.request)
-            }
-        )
+        fetch(event.request)
+            .then(freshResponse => {
+                caches.open('offline-site')
+                    .then(cache => {
+                        cache.put(event.request, freshResponse.clone())
+                    })
+                return freshResponse.clone()
+            })
+            .catch(() => caches.match(event.request))
     )
 })
